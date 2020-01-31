@@ -1,28 +1,12 @@
-# CS118 Project 1
+NAME: Ethan Kwan
+UID: 004899710
 
-Template for for [UCLA CS118 Spring 2019 Project 1]
+Design:
+Non-persistent HTTP/1.1 protocol local server that supports the transmission of .jpg, .gif, .html, and binary files. 
 
-## Makefile
+Problems:
+At first, due to the abrupt restarting of my server, my address was being blocked when I tried to bind the socket. To solve this, I used getsockopt() to set theREUSE_ADDR option for my socket, allowing the connection to go through. 
 
-This provides a couple make targets for things.
-By default (all target), it makes the `server` executables.
+Then once my connection was established, I could not properly read the HTTP requests because I was not properly managing the memory of my buffer. 
 
-It provides a `clean` target, and `tarball` target to create the submission file as well.
-
-You will need to modify the `Makefile` to add your userid for the `.tar.gz` turn-in at the top of the file.
-
-## Academic Integrity Note
-
-You are encouraged to host your code in private repositories on [GitHub](https://github.com/), [GitLab](https://gitlab.com), or other places.  At the same time, you are PROHIBITED to make your code for the class project public during the class or any time after the class.  If you do so, you will be violating academic honestly policy that you have signed, as well as the student code of conduct and be subject to serious sanctions.
-
-## Provided Files
-
-`server.c` is the entry points for the server part of the project.
-
-## TODO
-
-    ###########################################################
-    ##                                                       ##
-    ## REPLACE CONTENT OF THIS FILE WITH YOUR PROJECT REPORT ##
-    ##                                                       ##
-    ###########################################################
+For part B, my responses were not properly displaying to my broswer. However, I realized that Chrome sends additional HTTP requests which was affecting the socket communication between the client and server. Once I switched to Mozilla, the contents of the test files were correctly displayed to browser. 
