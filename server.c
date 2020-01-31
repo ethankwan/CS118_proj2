@@ -17,9 +17,10 @@
 char* HTTP = "HTTP/1.1 ";
 char* INTER_ERROR_500 = "500 Internal Error\n";
 char* INTER_ERROR_404 = "404 Not Found\n";
-char* CONNECTION_CLOSE = "Connection: Close\n\n";
+char* CONNECTION_CLOSE = "Connection: Close\n";
 char* CONTENT_LENGTH = "Content-Length: 0\n";
-char* CONTENT_TYPE = "Content-Type: text/html\n";
+char* SERVER_NAME = "Ethan's Server\n";
+char* CONTENT_TYPE = "Content-Type: text/html;\n";
 char* HTTP_200 = "200 OK\n";
 char* CONTENT_LANGUAGE = "Content-Language: en-US\n";
 
@@ -149,24 +150,36 @@ int main(int argc, char *argv[])
 			strcpy(space, " ");
 			strcat(space, temp);
 		}
+
 		fprintf(stderr, "%s\n", file);
 		char suffix[4];
 		char type[20];
 
 		char* beginSuffix = strstr(file, ".");
-		strcpy(suffix, beginSuffix + 1);
+		if (beginSuffix != NULL)
+		{
+			strcpy(suffix, beginSuffix + 1);
 
-		if(strcmp(suffix, "jpg") == 0)
-		{
-			strcpy(type, "image/jpeg");
-		}
-		else if(strcmp(suffix, "gif") == 0)
-		{
-			strcpy(type, "image/gif");
+			if(strcmp(suffix, "jpg") == 0)
+			{
+				strcpy(type, "image/jpeg");
+			}
+			else if(strcmp(suffix, "gif") == 0)
+			{
+				strcpy(type, "image/gif");
+			}
+			else if(strcmp(suffix, "html") == 0 || strcmp(suffix, "txt") == 0)
+			{
+				strcpy(type, "text/html");
+			}
+			/*else
+			{
+				strcpy(type, "application/octet-stream");
+			}*/
 		}
 		else
 		{
-			strcpy(type, "text/plain");
+			strcpy(type, "application/octet-stream");
 		}
 
 		write(new_fd, HTTP, sizeof(HTTP));
@@ -176,19 +189,31 @@ int main(int argc, char *argv[])
 		{
 			printf("404 Not Found\n");
 			write(new_fd, INTER_ERROR_404, sizeof(INTER_ERROR_404));
-			write(new_fd, CONNECTION_CLOSE, sizeof(CONNECTION_CLOSE));
+			write(new_fd, SERVER_NAME, sizeof(SERVER_NAME));
 			write(new_fd, CONTENT_LENGTH, sizeof(CONTENT_LENGTH));
+			write(new_fd, CONNECTION_CLOSE, sizeof(CONNECTION_CLOSE));
 			write(new_fd, CONTENT_TYPE, sizeof(CONTENT_TYPE));
 			exit(1);
 		}
 
 		write(new_fd, HTTP_200, sizeof(HTTP_200));
 		write(new_fd, CONTENT_LANGUAGE, sizeof(CONTENT_LANGUAGE));
-		FILE *infile = fopen(file, "r");
 
+		/*FILE *infile;
+		if (beginSuffix == NULL)
+		{
+			infile = fopen(file, "rb");
+		}
+		else
+		{
+			infile = fopen(file, "r");
+		}*/
+		FILE *infile = fopen(file, "r");
+		
 		fseek(infile, 0L, SEEK_END);
 		int filesize = (int)ftell(infile);
 		fseek(infile, 0L, SEEK_SET);
+
 
 		sprintf(buf, "Content-Length: %d\n", filesize); // copy to buf
 		write(new_fd, buf, strlen(buf)); // copy buf to broswer
@@ -205,8 +230,8 @@ int main(int argc, char *argv[])
 			exit(1);
 		}
 
-		char* mem = (char*)malloc(sizeof(char) * filesize);
-		fread(mem, 1, filesize, infile);
+		char* mem = (char*)malloc(sizeof(char) * filesize); // allocate space in memory for file contents
+		fread(mem, 1, filesize, infile); // read file into memory 
 
 		int test;
 		test = write(new_fd, mem, filesize);
